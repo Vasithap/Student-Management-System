@@ -23,4 +23,12 @@ public class Course {
     private String title;
 
     private String description;
+
+    // Used by Admin analytics and shown to students in "My Courses"
+    @Column(nullable = true)
+    private Double feeAmount = 0.0;
+
+    // Course duration (days). Keep simple for assignment requirements.
+    @Column(nullable = true)
+    private Integer durationDays = 0;
 }

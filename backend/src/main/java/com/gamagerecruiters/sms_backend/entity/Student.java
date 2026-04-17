@@ -17,14 +17,20 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String firstName;
-
-    @Column(nullable = false)
     private String lastName;
-
-    @Column(unique = true, nullable = false)
     private String email;
-
     private String phone;
+    private String address;
+    private String nic;
+    private String guardianName;
+    private String guardianPhone;
+
+    // When true, student cannot self-edit profile fields anymore.
+    @Column(nullable = true)
+    private Boolean profileLocked = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "course_id")
+    private Course course;
 }

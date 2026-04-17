@@ -2,69 +2,98 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import api from "../../lib/axios";
 
 export default function LoginPage() {
+    // username = email, password = NIC
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        setError("");
+        setLoading(true);
 
-        // Simulating a brief network delay for premium UX feel
-        setTimeout(() => {
-            if (username && password) {
+        try {
+            const response = await api.post("/auth/login", { username, password });
+
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("username", response.data.username);
+            localStorage.setItem("role", response.data.role);
+
+            if (response.data.role === "STUDENT") {
+                router.push("/my-profile");
+            } else {
                 router.push("/dashboard");
             }
-            setIsSubmitting(false);
-        }, 800);
+        } catch (err: any) {
+            setError("Authentication failed. Invalid credentials provided.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-gray-200 w-full max-w-md transition-all">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 font-sans">
+            <div className="bg-white p-10 border-2 border-black rounded-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-md">
 
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-extrabold text-black tracking-tight">System Login</h1>
-                    <p className="mt-2 text-sm font-medium text-gray-800">Enter your credentials to access the dashboard.</p>
-                </div>
+                <header className="text-center mb-10">
+                    <h1 className="text-3xl font-black text-black uppercase tracking-tighter italic">System Access</h1>
+                    <div className="h-1 w-20 bg-black mx-auto mt-2"></div>
+                    <p className="text-[10px] font-black text-gray-500 mt-4 uppercase tracking-[0.2em]">Institutional Management Portal</p>
+                </header>
+
+                {error && (
+                    <div className="mb-8 p-4 bg-red-50 border-2 border-red-600 text-red-600 text-xs font-black uppercase tracking-tight">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleLogin} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-bold text-black mb-2">Username</label>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Email Address</label>
                         <input
                             type="text"
                             required
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-black sm:text-sm font-medium placeholder-gray-500"
-                            placeholder="e.g. admin"
+                            className="w-full p-3 bg-gray-50 border-2 border-gray-300 rounded focus:border-black outline-none transition-all font-bold text-black text-sm"
+                            placeholder="name@example.com"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-bold text-black mb-2">Password</label>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">NIC Number</label>
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-black sm:text-sm font-medium placeholder-gray-500"
-                            placeholder="••••••••"
+                            className="w-full p-3 bg-gray-50 border-2 border-gray-300 rounded focus:border-black outline-none transition-all font-bold text-black text-sm"
+                            placeholder="NIC used at registration"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-black bg-green-400 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+                        disabled={loading}
+                        className="w-full bg-green-400 border-2 border-black text-black p-4 rounded font-black uppercase text-xs tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-green-500 transition active:translate-y-1 active:shadow-none disabled:bg-gray-200 disabled:shadow-none mt-4"
                     >
-                        {isSubmitting ? 'Authenticating...' : 'Sign In'}
+                        {loading ? "Verifying..." : "Initialize Session"}
                     </button>
                 </form>
 
+                <footer className="mt-10 text-center space-y-1">
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                        Students: use your registered Email + NIC
+                    </p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                        Staff/Admin: use your assigned credentials
+                    </p>
+                </footer>
             </div>
         </div>
     );

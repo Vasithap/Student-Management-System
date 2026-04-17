@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import api from "../../lib/axios";
 import Link from "next/link";
 
 export default function DashboardPage() {
+    const router = useRouter();
     const [studentCount, setStudentCount] = useState<number>(0);
     const [courseCount, setCourseCount] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -20,18 +23,48 @@ export default function DashboardPage() {
                 setCourseCount(coursesRes.data.length);
             } catch (error) {
                 console.error("Failed to fetch dashboard data:", error);
+                setError("Failed to load dashboard data (access denied or backend error).");
             } finally {
                 setIsLoading(false);
             }
         };
 
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
+        if (role === "STUDENT") {
+            router.push("/my-profile");
+            return;
+        }
+
+        if (role !== "ADMIN" && role !== "STAFF") {
+            router.push("/login");
+            return;
+        }
+
         fetchDashboardData();
-    }, []);
+    }, [router]);
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
                 <div className="text-lg font-bold text-black animate-pulse">Loading dashboard...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+                <div className="bg-red-50 border-l-4 border-red-600 p-6 rounded-xl shadow-sm max-w-lg w-full">
+                    <p className="text-black font-bold text-lg uppercase tracking-tight">Error</p>
+                    <p className="text-gray-800 font-medium mt-1">{error}</p>
+                </div>
             </div>
         );
     }
@@ -42,7 +75,7 @@ export default function DashboardPage() {
 
                 <div className="mb-10 text-center sm:text-left">
                     <h1 className="text-4xl font-extrabold text-black tracking-tight">Admin Dashboard</h1>
-                    <p className="mt-2 text-base text-gray-800 font-medium">Overview of your institution's current metrics.</p>
+                    <p className="mt-2 text-base text-gray-800 font-medium">Overview of your institution's current records</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
