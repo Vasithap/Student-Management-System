@@ -284,55 +284,16 @@ student-management-system/
 - `Maven`
 - `PostgreSQL` or `Supabase`
 
-### Clone the Project
-```bash
-git clone <repository-url>
-cd student-management-system
-```
-
-### Backend Setup
-```bash
-cd backend
-mvn spring-boot:run
-```
-
-Or build it first:
-
-```bash
-mvn -DskipTests package
-```
 
 Backend default URL:
 
 - `http://localhost:8080`
 
-### Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
 
 Frontend default URL:
 
 - `http://localhost:3000`
 
-## Configuration Notes
-The backend currently reads database configuration from `backend/src/main/resources/application.properties`.
-
-Recommended improvement:
-
-- move all database credentials and secrets out of source code
-- use environment variables for production
-
-Example placeholder configuration:
-
-```properties
-spring.datasource.url=jdbc:postgresql://<host>:5432/<database>
-spring.datasource.username=<username>
-spring.datasource.password=<password>
-spring.jpa.hibernate.ddl-auto=update
-```
 
 ## How to Use
 ### Admin Workflow
@@ -378,11 +339,3 @@ spring.jpa.hibernate.ddl-auto=update
 - Replace the default homepage with a branded landing page
 - Move secrets and connection info to environment variables
 - Add DTOs, services, and validation classes for cleaner architecture
-
-## Verification
-The project was verified with:
-
-- `mvn -DskipTests package`
-- `npm run build`
-
-Both commands completed successfully after the latest changes.
